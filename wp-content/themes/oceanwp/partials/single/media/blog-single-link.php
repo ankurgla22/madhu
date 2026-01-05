@@ -15,9 +15,12 @@ if ( ! has_post_thumbnail() ) {
 	return;
 }
 
-// Get theme icons.
-$theme_icons = oceanwp_theme_icons();
-$icon_t = oceanwp_theme_icon_class();
+$icon_class = '';
+if ( 'svg' === oceanwp_theme_icon_class() ) {
+	$icon_class = 'link-post-svg-icon';
+} else {
+	$icon_class = '';
+}
 
 // Image args.
 $img_args = array(
@@ -30,6 +33,7 @@ if ( oceanwp_get_schema_markup( 'image' ) ) {
 
 // Caption.
 $caption = get_the_post_thumbnail_caption();
+
 ?>
 
 <div class="thumbnail">
@@ -48,9 +52,15 @@ $caption = get_the_post_thumbnail_caption();
 	}
 	?>
 
-	<div class="link-entry clr">
+	<div class="link-entry <?php echo esc_attr( $icon_class ); ?> clr">
 
-		<a href="<?php echo esc_url( get_post_meta( get_the_ID(), 'ocean_link_format', true ) ); ?>" target="_<?php echo esc_attr( get_post_meta( get_the_ID(), 'ocean_link_format_target', true ) ); ?>"><i class="<?php echo $theme_icons[ 'link' ][ $icon_t ]; ?>" aria-hidden="true"></i></a>
+		<a aria-label="<?php echo esc_attr( oceanwp_theme_strings( 'owp-string-link-post-format', false ) ); ?>" href="<?php echo esc_url( get_post_meta( get_the_ID(), 'ocean_link_format', true ) ); ?>" target="_<?php echo esc_attr( get_post_meta( get_the_ID(), 'ocean_link_format_target', true ) ); ?>"><?php oceanwp_icon( 'link' ); ?>
+
+			<?php if ( 'blank' === get_post_meta( get_the_ID(), 'ocean_link_format_target', true ) ) { ?>
+				<span class="screen-reader-text"><?php echo esc_html( oceanwp_theme_strings( 'owp-string-new-tab-alert', false ) ); ?></span>
+			<?php } ?>
+
+		</a>
 
 	</div>
 

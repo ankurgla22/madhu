@@ -54,7 +54,16 @@ if ( $get_id ) : ?>
 			echo do_shortcode( '[fl_builder_insert_layout id="' . $get_id . '"]' );
 
 			// Else.
+		} else if ( class_exists( 'SiteOrigin_Panels' ) && get_post_meta( $get_id, 'panels_data', true ) ) {
+
+			echo SiteOrigin_Panels::renderer()->render( $get_id );
+
 		} else {
+
+			// If Gutenberg.
+			if ( ocean_is_block_template( $get_id ) ) {
+				$get_content = apply_filters( 'oceanwp_top_bar_social_alt_content', do_blocks( $get_content ) );
+			}
 
 			// Display template content.
 			echo do_shortcode( $get_content );
@@ -71,7 +80,8 @@ endif;
 
 <?php
 // Return if there aren't any profiles defined and define var.
-if ( ! $profiles = get_theme_mod( 'ocean_top_bar_social_profiles' ) ) {
+$profiles = get_theme_mod( 'ocean_top_bar_social_profiles' );
+if ( ! $profiles ) {
 	return;
 }
 
@@ -113,21 +123,21 @@ if ( 'blank' === $link_target ) {
 				echo '<li class="oceanwp-' . esc_attr( $key ) . '">';
 
 				if ( in_array( $key, array( 'skype' ), true ) ) {
-					echo '<a href="skype:' . esc_attr( $url ) . '?call" aria-label="' . esc_attr__( 'Skype (opens in your application)', 'oceanwp' ) . '" target="_self">';
+					echo '<a href="skype:' . esc_attr( $url ) . '?call" aria-label="' . esc_attr__( 'Skype (opens in your application)', 'oceanwp' ) . '" target="_self">'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped above.
 				} elseif ( in_array( $key, array( 'email' ), true ) ) {
-					echo '<a href="mailto:' . antispambot( esc_attr( $url ) ) . '" aria-label="' . esc_attr__( 'Send email (opens in your application)', 'oceanwp' ) . '" target="_self">'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					echo '<a href="mailto:' . antispambot( esc_attr( $url ) ) . '" aria-label="' . esc_attr__( 'Send email (opens in your application)', 'oceanwp' ) . '" target="_self">'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped above.
 				} else {
-					echo '<a href="' . $esc_url . '" ' . $aria_label . ' target="_' . esc_attr( $link_target ) . '" ' . $link_rel . '>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					echo '<a href="' . $esc_url . '" ' . $aria_label . ' target="_' . esc_attr( $link_target ) . '" ' . $link_rel . '>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped  -- Escaped above.
 				}
 
-				echo '<span class="' . esc_attr( $val['icon_class'] ) . '" aria-hidden="true"></span>';
+				echo $val['icon_class']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped  -- Escaped during generation.
 
 				echo '</a>';
 
 				echo '</li>';
 
 			} // End url check.
-		} // End loop
+		} // End loop.
 		?>
 
 	</ul>

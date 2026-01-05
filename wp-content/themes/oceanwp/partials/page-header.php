@@ -55,17 +55,13 @@ $heading = apply_filters( 'ocean_page_header_heading', $heading );
 		if ( oceanwp_has_page_header_heading() ) {
 			?>
 
-			<<?php echo esc_attr( $heading ); ?> class="page-header-title clr"<?php oceanwp_schema_markup( 'headline' ); ?>><?php echo wp_kses_post( oceanwp_title() ); ?></<?php echo esc_attr( $heading ); ?>>
+			<<?php echo esc_attr( $heading ); ?> class="page-header-title clr"<?php oceanwp_schema_markup( 'headline' ); ?>><?php echo wp_kses_post( oceanwp_has_page_title() ); ?></<?php echo esc_attr( $heading ); ?>>
 
 			<?php get_template_part( 'partials/page-header-subheading' ); ?>
 
 		<?php } ?>
 
-		<?php
-		if ( function_exists( 'oceanwp_breadcrumb_trail' ) ) {
-			oceanwp_breadcrumb_trail();
-		}
-		?>
+		<?php do_action( 'ocean_breadcrumbs_main' ); ?>
 
 	</div><!-- .page-header-inner -->
 

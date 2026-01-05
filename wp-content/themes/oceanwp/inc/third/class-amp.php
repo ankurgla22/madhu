@@ -111,8 +111,6 @@ if ( ! class_exists( 'OceanWP_AMP' ) ) {
 				top: .3em;
 				right: 20px;
 				cursor: pointer;
-				webkit-font-smoothing: antialiased;
-				moz-osx-font-smoothing: grayscale;
 				padding: 0 1em;
 				font-weight: normal;
 				line-height: inherit;
@@ -126,6 +124,11 @@ if ( ! class_exists( 'OceanWP_AMP' ) ) {
 			}
 			.menu-item-has-children > button.submenu-toggle.submenu-open::before {
 				content: "-";
+			}
+			.menu-item-has-children:hover > ul.sub-menu {
+				opacity: 1;
+				display: block;
+				visibility: visible;
 			}';
 
 			$amp_menu_breakpoint        = get_theme_mod( 'ocean_mobile_menu_breakpoints', '959' );

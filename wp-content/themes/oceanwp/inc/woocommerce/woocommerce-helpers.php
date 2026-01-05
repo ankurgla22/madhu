@@ -33,10 +33,10 @@ if ( ! function_exists( 'oceanwp_wcmenucart_menu_item' ) ) {
 			&& \Elementor\Plugin::$instance->editor->is_edit_mode() ) {
 			return;
 		}
-		
+
 		// Vars.
-		$icon_style   = get_theme_mod( 'ocean_woo_menu_icon_style', 'drop_down' );
-		$custom_link  = get_theme_mod( 'ocean_woo_menu_icon_custom_link' );
+		$icon_style  = get_theme_mod( 'ocean_woo_menu_icon_style', 'drop_down' );
+		$custom_link = get_theme_mod( 'ocean_woo_menu_icon_custom_link' );
 
 		// URL.
 		if ( 'custom_link' == $icon_style && $custom_link ) {
@@ -55,18 +55,19 @@ if ( ! function_exists( 'oceanwp_wcmenucart_menu_item' ) ) {
 		if ( 'icon_total' == $display ) {
 			$cart_extra = WC()->cart->get_total();
 			$cart_extra = str_replace( 'amount', 'wcmenucart-details', $cart_extra );
-		} else if ( 'icon_count' == $display && !is_null( WC()->cart ) ) {
-			$cart_extra = '<span class="wcmenucart-details count">'. WC()->cart->get_cart_contents_count() .'</span>';
-		} else if ( 'icon_count_total' == $display && !is_null( WC()->cart ) ) {
-			$cart_extra = '<span class="wcmenucart-details count">'. WC()->cart->get_cart_contents_count() .'</span>';
-			$cart_total = WC()->cart->get_total();
+		} elseif ( 'icon_count' == $display && ! is_null( WC()->cart ) ) {
+			$cart_extra = '<span class="wcmenucart-details count">' . WC()->cart->get_cart_contents_count() . '</span>';
+		} elseif ( 'icon_count_total' == $display && ! is_null( WC()->cart ) ) {
+			$cart_extra  = '<span class="wcmenucart-details count">' . WC()->cart->get_cart_contents_count() . '</span>';
+			$cart_total  = WC()->cart->get_total();
 			$cart_extra .= str_replace( 'amount', 'wcmenucart-details', $cart_total );
 		} else {
 			$cart_extra = '';
 		}
 
 		// Get cart icon.
-		$icon = get_theme_mod( 'ocean_woo_menu_icon', 'icon-handbag' );
+		$icon = get_theme_mod( 'ocean_woo_menu_icon', 'icon_handbag' );
+		$icon = in_array( $icon, oceanwp_get_cart_icons() ) && $icon ? $icon : 'icon_handbag';
 
 		// If has custom cart icon.
 		$custom_icon = get_theme_mod( 'ocean_woo_menu_custom_icon' );
@@ -74,39 +75,52 @@ if ( ! function_exists( 'oceanwp_wcmenucart_menu_item' ) ) {
 			$icon = $custom_icon;
 		}
 
-		// Cart Icon.
-		$cart_icon = '<i class="'. esc_attr( $icon ) .'" aria-hidden="true"></i>';
+		if ( '' != $custom_icon ) {
+			$cart_icon = '<i class="' . esc_attr( $icon ) . '" aria-hidden="true"></i>';
+		} else {
+			$cart_icon = oceanwp_icon( $icon, false );
+		}
+
 		$cart_icon = apply_filters( 'ocean_menu_cart_icon_html', $cart_icon );
+
+		// Cart Icon.
 
 		// If bag style.
 		$woo_bag_style = get_theme_mod( 'ocean_woo_menu_bag_style', 'no' );
 
-		if ( 'yes' === $woo_bag_style ) { ?>
+		$icon_url = '#';
+		if ( is_customize_preview() ) {
+			$icon_url = '#';
+		} else {
+			$icon_url = esc_url( $url );
+		}
 
-			<a href="<?php echo esc_url( $url ); ?>" class="<?php echo esc_attr( $classes ); ?>">
+		if ( 'yes' === $woo_bag_style ) { ?>
+			<a href="<?php echo $icon_url; ?>" class="<?php echo esc_attr( $classes ); ?>">
 				<?php
-				if ( true == get_theme_mod( 'ocean_woo_menu_bag_style_total', false ) ) { ?>
+				if ( true == get_theme_mod( 'ocean_woo_menu_bag_style_total', false ) ) {
+					?>
 					<span class="wcmenucart-total"><?php echo WC()->cart->get_total(); ?></span>
-				<?php }
+					<?php
+				}
 				?>
 				<span class="wcmenucart-cart-icon">
-					<?php if ( !is_null( WC()->cart ) ) { ?>
-						<span class="wcmenucart-count"><?php echo WC()->cart->get_cart_contents_count();  ?></span>
+					<?php if ( ! is_null( WC()->cart ) ) { ?>
+						<span class="wcmenucart-count"><?php echo WC()->cart->get_cart_contents_count(); ?></span>
 					<?php } ?>
 				</span>
 			</a>
 
 		<?php } else { ?>
 
-			<a href="<?php echo esc_url( $url ); ?>" class="<?php echo esc_attr( $classes ); ?>">
-				<span class="wcmenucart-count"><?php echo wp_kses_post( $cart_icon ); ?><?php echo wp_kses_post( $cart_extra ); ?></span>
+			<a href="<?php echo $icon_url; ?>" class="<?php echo esc_attr( $classes ); ?>">
+				<span class="wcmenucart-count"><?php echo $cart_icon; ?><?php echo wp_kses_post( $cart_extra ); ?></span>
 			</a>
 
-		<?php
+			<?php
 		}
 
 	}
-
 }
 
 /**
@@ -118,14 +132,13 @@ if ( ! function_exists( 'oceanwp_woo_placeholder_img' ) ) {
 
 	function oceanwp_woo_placeholder_img() {
 		if ( function_exists( 'wc_placeholder_img_src' ) && wc_placeholder_img_src() ) {
-			$placeholder = '<div class="woo-entry-image clr"><img src="'. wc_placeholder_img_src() .'" alt="'. __( 'Placeholder Image', 'oceanwp' ) .'" class="woo-entry-image-main" /></div>';
+			$placeholder = '<div class="woo-entry-image clr"><img src="' . wc_placeholder_img_src() . '" alt="' . __( 'Placeholder Image', 'oceanwp' ) . '" class="woo-entry-image-main" /></div>';
 			$placeholder = apply_filters( 'ocean_woo_placeholder_img_html', $placeholder );
 			if ( $placeholder ) {
 				echo wp_kses_post( $placeholder );
 			}
 		}
 	}
-
 }
 
 /**
@@ -137,11 +150,10 @@ if ( ! function_exists( 'oceanwp_woo_product_instock' ) ) {
 
 	function oceanwp_woo_product_instock( $post_id = '' ) {
 		global $post;
-		$post_id      = $post_id ? $post_id : $post->ID;
-		$product = wc_get_product($post_id);
-		return $product->is_in_stock();
+		$post_id = $post_id ? $post_id : $post->ID;
+		$product = wc_get_product( $post_id );
+		return $product ? $product->is_in_stock() : false;
 	}
-
 }
 
 /**
@@ -159,6 +171,10 @@ if ( ! function_exists( 'oceanwp_woo_product_elements_positioning' ) ) {
 		// Get sections from Customizer
 		$sections = get_theme_mod( 'oceanwp_woo_product_elements_positioning', $sections );
 
+		if (is_string($sections)) {
+			$sections = json_decode($sections, true);
+		}
+
 		// Turn into array if string
 		if ( $sections && ! is_array( $sections ) ) {
 			$sections = explode( ',', $sections );
@@ -171,7 +187,6 @@ if ( ! function_exists( 'oceanwp_woo_product_elements_positioning' ) ) {
 		return $sections;
 
 	}
-
 }
 
 /**
@@ -189,6 +204,10 @@ if ( ! function_exists( 'oceanwp_woo_summary_elements_positioning' ) ) {
 		// Get sections from Customizer
 		$sections = get_theme_mod( 'oceanwp_woo_summary_elements_positioning', $sections );
 
+		if (is_string($sections)) {
+			$sections = json_decode($sections, true);
+		}
+
 		// Turn into array if string
 		if ( $sections && ! is_array( $sections ) ) {
 			$sections = explode( ',', $sections );
@@ -201,7 +220,6 @@ if ( ! function_exists( 'oceanwp_woo_summary_elements_positioning' ) ) {
 		return $sections;
 
 	}
-
 }
 
 /**
@@ -211,16 +229,16 @@ if ( ! function_exists( 'oceanwp_woo_summary_elements_positioning' ) ) {
  */
 function ocean_is_wc_attribute() {
 
-    /**
-     * Attributes are proper taxonomies, therefore first thing is
-     * to check if we are on a taxonomy page using the is_tax().
-     */
-    if ( is_tax() && function_exists( 'taxonomy_is_product_attribute') ) {
+	/**
+	 * Attributes are proper taxonomies, therefore first thing is
+	 * to check if we are on a taxonomy page using the is_tax().
+	 */
+	if ( is_tax() && function_exists( 'taxonomy_is_product_attribute' ) ) {
 
-        $tax_obj = get_queried_object();
+		$tax_obj = get_queried_object();
 		return taxonomy_is_product_attribute( $tax_obj->taxonomy );
-    }
-    return false;
+	}
+	return false;
 }
 
 /**
@@ -230,16 +248,16 @@ function ocean_is_wc_attribute() {
  */
 function get_term_tax_attr() {
 
-	if ( function_exists( 'taxonomy_is_product_attribute') ) {
+	if ( function_exists( 'taxonomy_is_product_attribute' ) ) {
 		$attr_taxonomies = wc_get_attribute_taxonomies();
 	}
 
 	$taxonomy_terms = array();
 
 	if ( $attr_taxonomies ) {
-		foreach ($attr_taxonomies as $tax) {
-			if (taxonomy_exists(wc_attribute_taxonomy_name($tax->attribute_name))) {
-				$taxonomy_terms[$tax->attribute_name] = get_terms( wc_attribute_taxonomy_name($tax->attribute_name), 'orderby=name&hide_empty=0' );
+		foreach ( $attr_taxonomies as $tax ) {
+			if ( taxonomy_exists( wc_attribute_taxonomy_name( $tax->attribute_name ) ) ) {
+				$taxonomy_terms[ $tax->attribute_name ] = get_terms( wc_attribute_taxonomy_name( $tax->attribute_name ), 'orderby=name&hide_empty=0' );
 			}
 		}
 	}
@@ -247,7 +265,7 @@ function get_term_tax_attr() {
 
 /**
  * WooCommerce product image gallery open and close tags
- * 
+ *
  * @since 2.0
  */
 if ( ! function_exists( 'ocean_woo_img_link_open' ) ) {
@@ -258,7 +276,7 @@ if ( ! function_exists( 'ocean_woo_img_link_open' ) ) {
 		$woo_img_link = get_the_permalink( $product->get_id() );
 
 		echo '<a href="' . esc_url( $woo_img_link ) . '" class="woocommerce-LoopProduct-link">';
-		
+
 	}
 }
 
@@ -270,7 +288,7 @@ if ( ! function_exists( 'ocean_woo_img_link_close' ) ) {
 
 /**
  * WooCommerce Grid List Product Archive Excerpt
- * 
+ *
  * @since 2.0
  */
 if ( ! function_exists( 'ocean_woo_grid_view_excerpt' ) ) {
@@ -286,7 +304,7 @@ if ( ! function_exists( 'ocean_woo_grid_view_excerpt' ) ) {
 			$woo_excerpt = wp_kses_post( strip_shortcodes( $woo_excerpt ) );
 		} else {
 			$woo_excerpt = wp_trim_words( strip_shortcodes( $woo_excerpt ), $exc_length ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		} 
+		}
 
 		echo $woo_excerpt;
 	}
@@ -381,12 +399,12 @@ if ( ! function_exists( 'owp_yith_wishlist_browse_button_label' ) ) {
 	 */
 	function owp_yith_wishlist_browse_button_label() {
 
-		$icon_option = get_option( 'yith_wcwl_add_to_wishlist_icon' );
-		$custom_icon = 'none' != $icon_option ? get_option( 'yith_wcwl_add_to_wishlist_custom_icon' ) : '';
+		$icon_option       = get_option( 'yith_wcwl_add_to_wishlist_icon' );
+		$custom_icon       = 'none' != $icon_option ? get_option( 'yith_wcwl_add_to_wishlist_custom_icon' ) : '';
 		$added_icon_option = get_option( 'yith_wcwl_added_to_wishlist_icon' );
 		$custom_added_icon = 'none' != $added_icon_option ? get_option( 'yith_wcwl_added_to_wishlist_custom_icon' ) : '';
 
-		$icon = apply_filters( 'yith_wcwl_button_icon', 'none' != $icon_option ? $icon_option : '' );
+		$icon       = apply_filters( 'yith_wcwl_button_icon', 'none' != $icon_option ? $icon_option : '' );
 		$added_icon = apply_filters( 'yith_wcwl_button_added_icon', 'none' != $added_icon_option ? $added_icon_option : '' );
 
 		if ( $added_icon ) {

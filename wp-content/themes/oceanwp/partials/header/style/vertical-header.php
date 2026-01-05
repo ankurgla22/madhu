@@ -78,7 +78,16 @@ $classes = implode( ' ', $classes ); ?>
 			// If Beaver Builder.
 			echo do_shortcode( '[fl_builder_insert_layout id="' . $template . '"]' );
 
+		} else if ( class_exists( 'SiteOrigin_Panels' ) && get_post_meta( $template, 'panels_data', true ) ) {
+
+			echo SiteOrigin_Panels::renderer()->render( $template );
+
 		} else {
+
+			// If Gutenberg.
+			if ( ocean_is_block_template( $template ) ) {
+				$get_content = apply_filters( 'oceanwp_vertical_header_content', do_blocks( $get_content ) );
+			}
 
 			// Display template content.
 			echo do_shortcode( $get_content );
@@ -112,14 +121,23 @@ $classes = implode( ' ', $classes ); ?>
 				// If Elementor.
 				OceanWP_Elementor::get_vertical_header_bottom_content();
 
-			} elseif ( OCEANWP_BEAVER_BUILDER_ACTIVE && ! empty( $bottom_template ) ) {
+			} else if ( OCEANWP_BEAVER_BUILDER_ACTIVE && ! empty( $bottom_template ) ) {
 
 				// If Beaver Builder.
 				echo do_shortcode( '[fl_builder_insert_layout id="' . $bottom_template . '"]' );
 
+			} else if ( class_exists( 'SiteOrigin_Panels' ) && get_post_meta( $bottom_template, 'panels_data', true ) ) {
+
+				echo SiteOrigin_Panels::renderer()->render( $bottom_template );
+
 			} else {
 
-				// Display bottom template content.
+				// If Gutenberg.
+				if ( ocean_is_block_template( $bottom_template ) ) {
+					$get_bottom_content = apply_filters( 'oceanwp_vertical_header_bottom_content', do_blocks( $get_bottom_content ) );
+				}
+
+				// Display template content.
 				echo do_shortcode( $get_bottom_content );
 
 			}

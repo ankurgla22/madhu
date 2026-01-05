@@ -91,8 +91,6 @@ input[type=checkbox]:checked:before {
 	line-height: 14px;
 	font-family: 'Font Awesome 5 Free';
 	text-rendering: auto;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
 }
 
 input[type=checkbox]:checked:before {
@@ -251,7 +249,10 @@ button[type="submit"],
 .button,
 body div.wpforms-container-full .wpforms-form input[type=submit],
 body div.wpforms-container-full .wpforms-form button[type=submit],
-body div.wpforms-container-full .wpforms-form .wpforms-page-button {
+body div.wpforms-container-full .wpforms-form .wpforms-page-button,
+.woocommerce-cart .wp-element-button,
+.woocommerce-checkout .wp-element-button,
+.wp-block-button__link {
 	display: inline-block;
     font-family: inherit;
     background-color: $color-5;
@@ -278,19 +279,26 @@ input[type="reset"]:focus,
 input[type="submit"]:focus,
 button[type="submit"]:focus,
 .button:hover,
+.button:focus,
 body div.wpforms-container-full .wpforms-form input[type=submit]:hover,
 body div.wpforms-container-full .wpforms-form button[type=submit]:hover,
-body div.wpforms-container-full .wpforms-form .wpforms-page-button:hover {
+body div.wpforms-container-full .wpforms-form .wpforms-page-button:hover,
+.woocommerce-cart .wp-element-button:hover,
+.woocommerce-checkout .wp-element-button:hover {
 	background-color: $color-6;
 	color: $color-1;
+}
+
+.elementor-form input[type=checkbox],
+.elementor-form input[type=radio] {
+    display: inline-block !important;
 }
 
 input[type="button"]:focus,
 input[type="reset"]:focus,
 input[type="submit"]:focus,
 button[type="submit"]:focus,
-button:focus,
-.button:focus {
+button:focus {
 	outline: 0;
 }
 

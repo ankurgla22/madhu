@@ -2,16 +2,24 @@
 /**
  * Product Loop Start
  *
- * @author    WooThemes
- * @package   WooCommerce/Templates
- * @version   9999
+ * This template can be overridden by copying it to yourtheme/woocommerce/loop/loop-start.php.
+ *
+ * HOWEVER, on occasion WooCommerce will need to update template files and you
+ * (the theme developer) will need to copy the new files to your theme to
+ * maintain compatibility. We try to do this as little as possible, but it does
+ * happen. When this occurs the version of the template file will be bumped and
+ * the readme will list any important changes.
+ *
+ * @see         https://docs.woocommerce.com/document/template-structure/
+ * @package     WooCommerce\Templates
+ * @version     3.3.0
  */
 
 // Classes.
 $wrap_classes = array( 'products', 'oceanwp-row', 'clr' );
 
 // List/grid style.
-if ( ( oceanwp_is_woo_shop() || oceanwp_is_woo_tax() )
+if ( ( (function_exists( 'oceanwp_is_woo_shop' ) && oceanwp_is_woo_shop()) || (function_exists( 'oceanwp_is_woo_tax' ) && oceanwp_is_woo_tax()) )
 	&& get_theme_mod( 'ocean_woo_grid_list', true )
 	&& 'list' === get_theme_mod( 'ocean_woo_catalog_view', 'grid' ) ) {
 	$wrap_classes[] = 'list';
@@ -20,8 +28,13 @@ if ( ( oceanwp_is_woo_shop() || oceanwp_is_woo_tax() )
 }
 
 // Responsive columns.
-$tablet_columns = get_theme_mod( 'ocean_woocommerce_tablet_shop_columns' );
-$mobile_columns = get_theme_mod( 'ocean_woocommerce_mobile_shop_columns' );
+$columns        = get_theme_mod( 'ocean_woocommerce_shop_columns', 3 );
+$tablet_columns = get_theme_mod( 'ocean_woocommerce_tablet_shop_columns', 2 );
+$tablet_columns = empty( $tablet_columns ) ? (int) $columns : $tablet_columns;
+$tablet_columns = apply_filters( 'ocean_shop_grid_columns_tablet', $tablet_columns );
+$mobile_columns = get_theme_mod( 'ocean_woocommerce_mobile_shop_columns', 1 );
+$mobile_columns = empty( $mobile_columns ) ? $tablet_columns : $mobile_columns;
+$mobile_columns = apply_filters( 'ocean_shop_grid_columns_mobile', $mobile_columns );
 
 if ( ! empty( $tablet_columns ) ) {
 	$wrap_classes[] = 'tablet-col';
@@ -35,6 +48,8 @@ if ( ! empty( $mobile_columns ) ) {
 // If infinite scroll.
 if ( 'infinite_scroll' === get_theme_mod( 'ocean_woo_pagination_style', 'standard' ) ) {
 	$wrap_classes[] = 'infinite-scroll-wrap';
+} else if ( 'load_more' === get_theme_mod( 'ocean_woo_pagination_style', 'standard' ) ) {
+	$wrap_classes[] = 'load-more-wrap';
 }
 
 $wrap_classes = implode( ' ', $wrap_classes ); ?>

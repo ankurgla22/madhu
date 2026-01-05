@@ -14,11 +14,10 @@ $ocean_woo_single_cond = get_theme_mod( 'ocean_woo_single_conditional', false );
 
 // Conditional vars.
 $show_woo_single = '';
-$show_woo_single = ( is_user_logged_in() && $ocean_woo_single_cond === true );
+$show_woo_single = ( ! $ocean_woo_single_cond ) || is_user_logged_in();
 
 /**
  * Display Single Product template
- * 
  */
 
 // Get elements.
@@ -46,11 +45,18 @@ foreach ( $elements as $element ) {
 	// Price.
 	if ( 'price' === $element ) {
 
-		if ( false === $ocean_woo_single_cond || $show_woo_single ) {
+		if ( true !== $ocean_woo_single_cond || $show_woo_single ) {
 
 			woocommerce_template_single_price();
 
 		}
+	}
+
+	// Brands
+	if ( 'brands' === $element ) {
+
+		do_action('ocean_woo_template_single_brands');
+
 	}
 
 	// Excerpt.
@@ -85,7 +91,7 @@ foreach ( $elements as $element ) {
 					echo '<span>'. $ocean_woo_single_msg_txt .'</span>';
 				} else {
 					echo '<a href="' . esc_url( get_permalink( wc_get_page_id( 'myaccount' ) ) ) . '">' . $ocean_woo_single_msg_txt . '</a>';
-				}	
+				}
 				echo '</div>';
 
 			}
@@ -94,9 +100,7 @@ foreach ( $elements as $element ) {
 
 	// Meta.
 	if ( 'meta' === $element ) {
-
 		woocommerce_template_single_meta();
-		
 	}
 
 	do_action( 'ocean_after_single_product_' . $element );

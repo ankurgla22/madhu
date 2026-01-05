@@ -64,7 +64,9 @@ if ( 'sidebar' === oceanwp_mobile_menu_style() ) {
 	<?php
 	// Mobile search form.
 	if ( get_theme_mod( 'ocean_mobile_menu_search', true ) ) {
+		ob_start();
 		get_template_part( 'partials/mobile/mobile-search' );
+		echo ob_get_clean();
 	}
 }
 ?>
@@ -75,7 +77,6 @@ if ( 'fullscreen' === oceanwp_mobile_menu_style() ) {
 	get_template_part( 'partials/mobile/mobile-fullscreen' );
 }
 ?>
-
 
 <?php wp_footer(); ?>
 </body>

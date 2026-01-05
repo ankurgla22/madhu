@@ -171,6 +171,12 @@ body.breadcrumbs-position-default .page-header-title {
     }
   }
 
+  &.woocommerce-breadcrumbs {
+    .breadcrumb-sep {
+      margin: 0 6px;
+    }
+  }
+
   .icon-home.has-text,
   .breadcrumb-home.has-icon {
     display: none;
@@ -178,6 +184,10 @@ body.breadcrumbs-position-default .page-header-title {
 
   .breadcrumb-title {
     margin-right: 5px;
+  }
+
+  .owp-icon {
+    vertical-align: text-top;
   }
 }
 
@@ -224,6 +234,14 @@ body.breadcrumbs-position-default .page-header-title {
 .site-breadcrumbs nav,
 .site-breadcrumbs ol {
   margin: 0;
+}
+
+.elementor {
+  .site-breadcrumbs {
+    position: relative;
+    display: block;
+    overflow: visible;
+  }
 }
 
 /*------------------------------------*

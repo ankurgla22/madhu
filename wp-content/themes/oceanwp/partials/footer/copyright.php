@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Get copyright text.
-$copy = get_theme_mod( 'ocean_footer_copyright_text', 'Copyright - OceanWP Theme by Nick' );
+$copy = get_theme_mod( 'ocean_footer_copyright_text', 'Copyright - WordPress Theme by OceanWP' );
 $copy = oceanwp_tm_translation( 'ocean_footer_copyright_text', $copy );
 
 // Get footer menu location and apply filters for child theming.
@@ -65,11 +65,15 @@ $wrap_classes = implode( ' ', $wrap_classes ); ?>
 
 		<?php
 		// Display copyright info.
-		if ( $copy ) :
+		if ( ! empty($copy) ) :
 			?>
 
 			<div id="copyright" class="clr" role="contentinfo">
-				<?php echo wp_kses_post( do_shortcode( $copy ) ); ?>
+				<?php
+				if ( ! empty($copy) ) {
+					echo wp_kses_post( do_shortcode( $copy ) );
+				}
+				?>
 			</div><!-- #copyright -->
 
 			<?php

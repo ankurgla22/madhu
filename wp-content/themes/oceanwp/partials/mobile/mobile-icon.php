@@ -44,11 +44,14 @@ if ( has_nav_menu( $menu_location ) || $ms_global_menu ) :
 	$close_text = oceanwp_tm_translation( 'ocean_mobile_menu_close_text', $close_text );
 	$close_text = $close_text ? $close_text : esc_html__( 'Close', 'oceanwp' );
 
+	// SEO link txt.
+	$anchorlink_text = esc_html( oceanwp_theme_strings( 'owp-string-mobile-icon-anchor', false ) );
+
 	if ( OCEANWP_WOOCOMMERCE_ACTIVE ) {
 
 		// Get cart icon.
-		$woo_icon = get_theme_mod( 'ocean_woo_menu_icon', 'icon-handbag' );
-		$woo_icon = $woo_icon ? $woo_icon : 'icon-handbag';
+		$woo_icon = get_theme_mod( 'ocean_woo_menu_icon', 'icon_handbag' );
+		$woo_icon = in_array( $woo_icon, oceanwp_get_cart_icons(), true ) && $woo_icon ? $woo_icon : 'icon_handbag';
 
 		// If has custom cart icon.
 		$custom_icon = get_theme_mod( 'ocean_woo_menu_custom_icon' );
@@ -56,8 +59,13 @@ if ( has_nav_menu( $menu_location ) || $ms_global_menu ) :
 			$woo_icon = $custom_icon;
 		}
 
+		if ( '' !== $custom_icon ) {
+			$cart_icon = '<i class="' . esc_attr( $woo_icon ) . '" aria-hidden="true"></i>';
+		} else {
+			$cart_icon = oceanwp_icon( $woo_icon, false );
+		}
+
 		// Cart Icon.
-		$cart_icon = '<i class="' . esc_attr( $woo_icon ) . '" aria-hidden="true"></i>';
 		$cart_icon = apply_filters( 'ocean_menu_cart_icon_html', $cart_icon );
 
 	}
@@ -75,6 +83,8 @@ if ( has_nav_menu( $menu_location ) || $ms_global_menu ) :
 	// Turn classes into space seperated string.
 	$classes = implode( ' ', $classes ); ?>
 
+	<?php do_action( 'ocean_mobile_menu_icon_before' ); ?>
+
 	<div class="<?php echo esc_attr( $classes ); ?>">
 
 		<?php do_action( 'ocean_before_mobile_icon' ); ?>
@@ -90,11 +100,11 @@ if ( has_nav_menu( $menu_location ) || $ms_global_menu ) :
 
 		<?php do_action( 'ocean_before_mobile_icon_inner' ); ?>
 
-		<a href="javascript:void(0)" class="mobile-menu" <?php echo $toggle_menu_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> aria-label="<?php esc_attr_e( 'Mobile Menu', 'oceanwp' ); ?>">
+		<a href="<?php echo esc_url( ocean_get_site_name_anchors( $anchorlink_text ) ); ?>" class="mobile-menu" <?php echo $toggle_menu_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> aria-label="<?php esc_attr_e( 'Mobile Menu', 'oceanwp' ); ?>">
 			<?php
 			if ( 'default' !== $btn ) {
 				?>
-				<div class="hamburger hamburger--<?php echo esc_attr( $btn ); ?>" aria-expanded="false">
+				<div class="hamburger hamburger--<?php echo esc_attr( $btn ); ?>" aria-expanded="false" role="navigation">
 					<div class="hamburger-box">
 						<div class="hamburger-inner"></div>
 					</div>
@@ -130,5 +140,7 @@ if ( has_nav_menu( $menu_location ) || $ms_global_menu ) :
 		<?php do_action( 'ocean_after_mobile_icon' ); ?>
 
 	</div><!-- #oceanwp-mobile-menu-navbar -->
+
+	<?php do_action( 'ocean_mobile_menu_icon_after' ); ?>
 
 <?php endif; ?>

@@ -25,7 +25,7 @@ $content = oceanwp_tm_translation( 'ocean_top_bar_content', $content );
 
 // Display topbar content.
 if ( ! empty( $template )
-	|| $content
+	|| ! empty($content)
 	|| has_nav_menu( 'topbar_menu' )
 	|| is_customize_preview() ) : ?>
 
@@ -57,7 +57,16 @@ if ( ! empty( $template )
 					echo do_shortcode( '[fl_builder_insert_layout id="' . $template . '"]' );
 
 					// Else.
+				} else if ( class_exists( 'SiteOrigin_Panels' ) && get_post_meta( $template, 'panels_data', true ) ) {
+
+					echo SiteOrigin_Panels::renderer()->render( $template );
+
 				} else {
+
+					// If Gutenberg.
+					if ( ocean_is_block_template( $template ) ) {
+						$get_content = apply_filters( 'oceanwp_topbar_template_content', do_blocks( $get_content ) );
+					}
 
 					// Display template content.
 					echo do_shortcode( $get_content );
@@ -73,7 +82,7 @@ if ( ! empty( $template )
 
 			<?php
 			// Check if there is content for the topbar.
-			if ( $content
+			if ( !empty($content)
 				|| is_customize_preview() ) :
 				?>
 
@@ -81,7 +90,9 @@ if ( ! empty( $template )
 
 					<?php
 					// Display top bar content.
-					echo do_shortcode( $content );
+					if ( !empty($content) ) {
+						echo do_shortcode( $content );
+					}
 					?>
 
 				</span>

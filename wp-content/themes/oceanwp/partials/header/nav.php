@@ -10,6 +10,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+static $ocean_nav_plugin = false;
+
 // Retunr if disabled.
 if ( ! oceanwp_display_navigation() ) {
 	return;
@@ -34,9 +36,12 @@ $inner_classes = oceanwp_header_menu_classes( 'inner' );
 // Nav attributes.
 $owp_nav_attrs = apply_filters( 'oceanwp_attrs_main_nav', '' );
 
-if ( ! empty( $template ) ) {
-
+if ( ! empty( $template ) && ! defined( 'OCEANWP_NAV_SHORTCODE_DONE' ) ) {
 	do_action( 'ocean_before_nav' );
+
+	if ( preg_match( '(oceanwp_nav|ocean_wp)', $get_content ) === 1 ) {
+		define( 'OCEANWP_NAV_SHORTCODE_DONE', true );
+	}
 
 	// If is not full screen header style.
 	if ( 'full_screen' !== $header_style ) { ?>
@@ -56,7 +61,16 @@ if ( ! empty( $template ) ) {
 			// If Beaver Builder.
 			echo do_shortcode( '[fl_builder_insert_layout id="' . $template . '"]' );
 
+		}  else if ( class_exists( 'SiteOrigin_Panels' ) && get_post_meta( $template, 'panels_data', true ) ) {
+
+			echo SiteOrigin_Panels::renderer()->render( $template );
+
 		} else {
+
+			// If Gutenberg.
+			if ( ocean_is_block_template( $template ) ) {
+				$get_content = apply_filters( 'oceanwp_nav_template_content', do_blocks( $get_content ) );
+			}
 
 			// Display template content.
 			echo do_shortcode( $get_content );

@@ -80,8 +80,6 @@
 		font-style: normal;
 		letter-spacing: normal;
 		text-rendering: auto;
-		-webkit-font-smoothing: antialiased;
-		-moz-osx-font-smoothing: grayscale;
 	}
 
 	.edd-loading {
@@ -283,8 +281,6 @@
 				display: inline-block;
 				font-family: normal normal normal 14px/1 'Font Awesome 5 free';
 				text-rendering: auto;
-				-webkit-font-smoothing: antialiased;
-				-moz-osx-font-smoothing: grayscale;
 				position: absolute;
 				top: 0;
 				left: 0;
@@ -312,7 +308,7 @@
 
 /* Grid */
 
-@media only screen and(min-width: 481px) and(max-width: 768px) {
+@media only screen and (min-width: 481px) and (max-width: 768px) {
 	.edd_downloads_list.oceanwp-row {
 		&.tablet-col .col {
 			clear: none;
@@ -363,7 +359,7 @@
 		}
 	}
 }
-@media only screen and(max-width: 480px) {
+@media only screen and (max-width: 480px) {
 	.edd_downloads_list.oceanwp-row {
 		&.mobile-col .col {
 			clear: none;
@@ -1046,6 +1042,19 @@
 				line-height: 1.2;
 			}
 
+			.owp-icon {
+				display: inline-block;
+				height: 100%;
+				width: 100%;
+				padding: 6px;
+
+				&:hover {
+					use {
+						stroke: #fff;
+					}
+				}
+			}
+
 			&:hover {
 				background-color: $color-5;
 				color: #fff;
@@ -1072,6 +1081,33 @@
 		    transform: translateX(-50%);
 		}
     }
+}
+
+@media only screen and (max-width: 767px) {
+
+	.owp-product-nav {
+		display: block;
+
+		li.next-li {
+			float: right;
+			display: flex;
+    		align-items: center;
+		}
+
+		li.prev-li {
+			float: left;
+			display: flex;
+    		align-items: center;
+		}
+
+		li {
+			position: relative;
+
+			a.owp-nav-text {
+				display: inline-block;
+			}
+		}
+	}
 }
 
 /* Error styles */

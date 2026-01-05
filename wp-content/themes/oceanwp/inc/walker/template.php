@@ -24,7 +24,7 @@ if ( ! empty( $get_id ) ) {
 	}
 
 }
-	
+
 // If Elementor
 if ( OCEANWP_ELEMENTOR_ACTIVE && $elementor ) {
 
@@ -39,10 +39,21 @@ else if ( OCEANWP_BEAVER_BUILDER_ACTIVE && ! empty( $get_id ) ) {
 
 }
 
+else if ( class_exists( 'SiteOrigin_Panels' ) && get_post_meta( $get_id, 'panels_data', true ) ) {
+
+	echo SiteOrigin_Panels::renderer()->render( $get_id );
+
+}
+
 // Else
 else {
 
-    // Display template content
-    echo do_shortcode( $content );
+	// If Gutenberg.
+	if ( ocean_is_block_template( $get_id ) ) {
+		$content = apply_filters( 'ocean_mega_menu_template_content', do_blocks( $content ) );
+	}
+
+	// Display template content.
+	echo do_shortcode( $content );
 
 }
