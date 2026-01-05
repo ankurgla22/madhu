@@ -1,0 +1,68 @@
+# WordPress .gitignore
+
+# Claude Code
+.claude/
+
+# Sensitive files
+wp-config.php
+.env
+*.log
+
+# Database
+*.sql
+*.sql.gz
+mwp_db/
+
+# Uploads (too large for git)
+wp-content/uploads/
+
+# Cache files
+wp-content/cache/
+wp-content/advanced-cache.php
+wp-content/wp-cache-config.php
+wp-content/plugins/wp-super-cache/wp-cache-config.php
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Node modules (if any)
+node_modules/
+
+# Docker volumes
+db_data/
+
+# WordPress debug
+wp-content/debug.log
+
+# Upgrade files
+wp-content/upgrade/
+
+# Temporary files
+tmp/
+temp/
+
+# Large plugin caches
+wp-content/plugins/ewww-image-optimizer/
+wp-content/ewww/
+
+# WooCommerce logs
+wp-content/uploads/wc-logs/
+
+# Elementor CSS cache (regenerates automatically)
+wp-content/uploads/elementor/css/
+
+# Keep these tracked
+!.gitkeep

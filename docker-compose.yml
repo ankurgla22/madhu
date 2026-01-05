@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  wordpress:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: madhu-wordpress
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress_password
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DEBUG: "false"
+      WP_REDIS_HOST: redis
+    volumes:
+      - ./:/var/www/html
+      - ./php.ini:/usr/local/etc/php/conf.d/custom.ini
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - wordpress-network
+
+  db:
+    image: mysql:8.0
+    container_name: madhu-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress_password
+      MYSQL_ROOT_PASSWORD: root_password
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./mwp_db:/mwp_db
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - wordpress-network
+
+  redis:
+    image: redis:alpine
+    container_name: madhu-redis
+    restart: unless-stopped
+    networks:
+      - wordpress-network
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: madhu-phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: root_password
+    depends_on:
+      - db
+    networks:
+      - wordpress-network
+
+volumes:
+  db_data:
+
+networks:
+  wordpress-network:
+    driver: bridge
