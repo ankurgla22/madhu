@@ -7,6 +7,7 @@
 wp-config.php
 .env
 *.log
+license.txt
 
 # Database
 *.sql
