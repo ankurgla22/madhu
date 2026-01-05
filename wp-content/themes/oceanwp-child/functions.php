@@ -53,11 +53,17 @@ function oceanwp_child_enqueue_scripts() {
     );
 
     // Pass data to JavaScript
-    wp_localize_script('oceanwp-child-scripts', 'madhuData', array(
-        'ajaxUrl' => admin_url('admin-ajax.php'),
-        'cartUrl' => wc_get_cart_url(),
-        'checkoutUrl' => wc_get_checkout_url()
-    ));
+    $localize_data = array(
+        'ajaxUrl' => admin_url('admin-ajax.php')
+    );
+
+    // Add WooCommerce URLs only if WooCommerce is active
+    if (function_exists('WC')) {
+        $localize_data['cartUrl'] = wc_get_cart_url();
+        $localize_data['checkoutUrl'] = wc_get_checkout_url();
+    }
+
+    wp_localize_script('oceanwp-child-scripts', 'madhuData', $localize_data);
 }
 add_action('wp_enqueue_scripts', 'oceanwp_child_enqueue_scripts');
 

@@ -13,15 +13,21 @@
          * Sticky Header with shrink effect
          */
         var header = $('#site-header');
-        var scrollThreshold = 100;
+        var headerWrapper = $('#site-header-sticky-wrapper');
+        var body = $('body');
+        var scrollThreshold = 50;
 
         function handleScroll() {
             var scrollTop = $(window).scrollTop();
 
             if (scrollTop > scrollThreshold) {
                 header.addClass('is-scrolled');
+                headerWrapper.addClass('is-scrolled');
+                body.addClass('is-scrolled');
             } else {
                 header.removeClass('is-scrolled');
+                headerWrapper.removeClass('is-scrolled');
+                body.removeClass('is-scrolled');
             }
         }
 

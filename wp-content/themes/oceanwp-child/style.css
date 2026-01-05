@@ -69,26 +69,47 @@
 /* ==========================================================================
    2. Sticky Header
    ========================================================================== */
-#site-header {
-    position: sticky !important;
+#site-header,
+#site-header-sticky-wrapper #site-header {
+    position: -webkit-sticky;
+    position: sticky;
     top: 0;
     z-index: 9999;
-    transition: var(--transition-normal);
-    background: var(--madhu-white);
+    transition: all var(--transition-normal);
+    background: var(--madhu-white) !important;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 
-#site-header.is-scrolled {
-    box-shadow: var(--shadow-md);
+#site-header.is-scrolled,
+#site-header-sticky-wrapper.is-scrolled #site-header {
+    box-shadow: var(--shadow-md) !important;
 }
 
 /* Shrink header on scroll */
-.shrink-header #site-header-inner {
+body #site-header-inner,
+body.shrink-header #site-header-inner {
+    transition: padding var(--transition-normal);
+}
+
+body.shrink-header.is-scrolled #site-header-inner,
+.is-scrolled #site-header-inner {
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+}
+
+/* Ensure header is always visible */
+#site-header {
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Header logo transition */
+#site-logo img {
     transition: var(--transition-normal);
 }
 
-.shrink-header.is-scrolled #site-header-inner {
-    padding-top: 10px !important;
-    padding-bottom: 10px !important;
+body.is-scrolled #site-logo img {
+    max-height: 50px !important;
 }
 
 /* ==========================================================================

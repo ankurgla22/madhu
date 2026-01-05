@@ -9,7 +9,7 @@ E-commerce website for Madhu Spices Japan built with WordPress and WooCommerce.
 - **Theme:** OceanWP with custom child theme
 - **Page Builder:** Elementor
 - **Database:** MySQL 8.0
-- **Caching:** WP Super Cache + OPcache
+- **Caching:** WP Super Cache + OPcache (file-based caching for production)
 
 ## Local Development
 
@@ -61,7 +61,6 @@ docker exec -i madhu-db mysql -uwordpress -pwordpress_password wordpress < your-
 | WordPress | 8080 | Main application |
 | MySQL | 3306 | Database |
 | phpMyAdmin | 8081 | Database management |
-| Redis | 6379 | Object caching |
 
 ## Project Structure
 

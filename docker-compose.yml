@@ -15,7 +15,6 @@ services:
       WORDPRESS_DB_PASSWORD: wordpress_password
       WORDPRESS_DB_NAME: wordpress
       WORDPRESS_DEBUG: "false"
-      WP_REDIS_HOST: redis
     volumes:
       - ./:/var/www/html
       - ./php.ini:/usr/local/etc/php/conf.d/custom.ini
@@ -42,13 +41,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    networks:
-      - wordpress-network
-
-  redis:
-    image: redis:alpine
-    container_name: madhu-redis
-    restart: unless-stopped
     networks:
       - wordpress-network
 
