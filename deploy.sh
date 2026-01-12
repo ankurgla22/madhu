@@ -43,7 +43,7 @@ setup() {
 
     # Build and start containers
     log_info "Building and starting containers..."
-    docker-compose -f docker-compose.prod.yml up -d --build
+    docker compose -f docker-compose.prod.yml up -d --build
 
     log_info "Waiting for services to be ready..."
     sleep 30
@@ -70,7 +70,7 @@ update() {
 
     # Rebuild and restart containers
     log_info "Rebuilding containers..."
-    docker-compose -f docker-compose.prod.yml up -d --build
+    docker compose -f docker-compose.prod.yml up -d --build
 
     # Clear WordPress cache
     log_info "Clearing WordPress cache..."
@@ -139,13 +139,13 @@ restore() {
 
 # Show logs
 logs() {
-    docker-compose -f docker-compose.prod.yml logs -f --tail=100
+    docker compose -f docker-compose.prod.yml logs -f --tail=100
 }
 
 # Show status
 status() {
     log_info "Container Status:"
-    docker-compose -f docker-compose.prod.yml ps
+    docker compose -f docker-compose.prod.yml ps
     echo ""
     log_info "Disk Usage:"
     docker system df
@@ -154,7 +154,7 @@ status() {
 # Stop all containers
 stop() {
     log_info "Stopping containers..."
-    docker-compose -f docker-compose.prod.yml down
+    docker compose -f docker-compose.prod.yml down
     log_info "Containers stopped."
 }
 
