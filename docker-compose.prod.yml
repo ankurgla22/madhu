@@ -1,0 +1,95 @@
+version: '3.8'
+
+services:
+  # Nginx Reverse Proxy with automatic SSL
+  nginx-proxy:
+    image: nginxproxy/nginx-proxy:alpine
+    container_name: nginx-proxy
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - certs:/etc/nginx/certs:ro
+      - vhost:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+      - ./nginx-custom.conf:/etc/nginx/conf.d/custom.conf:ro
+    networks:
+      - wordpress-network
+
+  # Let's Encrypt SSL Certificate Manager
+  acme-companion:
+    image: nginxproxy/acme-companion
+    container_name: nginx-proxy-acme
+    restart: always
+    depends_on:
+      - nginx-proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - certs:/etc/nginx/certs:rw
+      - vhost:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+      - acme:/etc/acme.sh
+    environment:
+      - DEFAULT_EMAIL=${LETSENCRYPT_EMAIL}
+      - NGINX_PROXY_CONTAINER=nginx-proxy
+    networks:
+      - wordpress-network
+
+  wordpress:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: madhu-wordpress
+    restart: always
+    expose:
+      - "80"
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: ${DB_USER}
+      WORDPRESS_DB_PASSWORD: ${DB_PASSWORD}
+      WORDPRESS_DB_NAME: ${DB_NAME}
+      WORDPRESS_DEBUG: "false"
+      # Nginx proxy settings
+      VIRTUAL_HOST: ${DOMAIN}
+      LETSENCRYPT_HOST: ${DOMAIN}
+      LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
+    volumes:
+      - ./:/var/www/html
+      - ./php.ini:/usr/local/etc/php/conf.d/custom.ini
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - wordpress-network
+
+  db:
+    image: mysql:8.0
+    container_name: madhu-mysql
+    restart: always
+    environment:
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - wordpress-network
+
+volumes:
+  db_data:
+  certs:
+  vhost:
+  html:
+  acme:
+
+networks:
+  wordpress-network:
+    driver: bridge

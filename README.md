@@ -6,10 +6,11 @@ E-commerce website for Madhu Spices Japan built with WordPress and WooCommerce.
 
 - **CMS:** WordPress 6.9
 - **E-commerce:** WooCommerce 10.4.3
-- **Theme:** OceanWP with custom child theme
+- **Theme:** OceanWP 4.1.4
 - **Page Builder:** Elementor
 - **Database:** MySQL 8.0
-- **Caching:** WP Super Cache + OPcache (file-based caching for production)
+- **Caching:** WP Super Cache + OPcache
+- **SSL:** Let's Encrypt (automatic)
 
 ## Local Development
 
@@ -44,69 +45,143 @@ define('DB_HOST', 'db:3306');
 docker-compose up -d
 ```
 
-5. Import database (if you have a backup):
-```bash
-docker exec -i madhu-db mysql -uwordpress -pwordpress_password wordpress < your-backup.sql
-```
-
-6. Access the site:
+5. Access the site:
 - Frontend: http://localhost:8080
 - Admin: http://localhost:8080/wp-admin
 - phpMyAdmin: http://localhost:8081
 
-### Docker Services
+## Production Deployment (Oracle Cloud)
 
-| Service | Port | Description |
-|---------|------|-------------|
-| WordPress | 8080 | Main application |
-| MySQL | 3306 | Database |
-| phpMyAdmin | 8081 | Database management |
+### Server Requirements
+
+- Ubuntu 22.04 LTS
+- Docker & Docker Compose installed
+- Domain pointed to server IP
+- Ports 80 and 443 open in security rules
+
+### Initial Server Setup
+
+1. **Install Docker on Ubuntu:**
+```bash
+# Update system
+sudo apt update && sudo apt upgrade -y
+
+# Install Docker
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+sudo usermod -aG docker $USER
+
+# Install Docker Compose
+sudo apt install docker-compose-plugin -y
+
+# Logout and login again for group changes
+```
+
+2. **Clone repository:**
+```bash
+git clone https://github.com/ankurgla22/madhu.git
+cd madhu/web
+```
+
+3. **Configure environment:**
+```bash
+cp .env.example .env
+nano .env  # Edit with your values
+```
+
+4. **Configure wp-config.php:**
+```bash
+cp wp-config-sample.php wp-config.php
+nano wp-config.php
+```
+
+Update with production database credentials and add:
+```php
+// Force HTTPS
+define('FORCE_SSL_ADMIN', true);
+if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
+    $_SERVER['HTTPS'] = 'on';
+}
+
+// Site URLs
+define('WP_HOME', 'https://yourdomain.com');
+define('WP_SITEURL', 'https://yourdomain.com');
+```
+
+5. **Deploy:**
+```bash
+chmod +x deploy.sh
+./deploy.sh setup
+```
+
+### Updating Production
+
+After making changes locally and pushing to GitHub:
+
+```bash
+# On server
+cd ~/madhu/web
+./deploy.sh update
+```
+
+### Deployment Commands
+
+| Command | Description |
+|---------|-------------|
+| `./deploy.sh setup` | Initial server setup |
+| `./deploy.sh update` | Pull latest & redeploy |
+| `./deploy.sh backup` | Create backup |
+| `./deploy.sh restore <dir>` | Restore from backup |
+| `./deploy.sh logs` | View container logs |
+| `./deploy.sh status` | Show container status |
+| `./deploy.sh stop` | Stop all containers |
+
+### Oracle Cloud Security Rules
+
+Open these ports in your VCN Security List:
+- Port 80 (HTTP) - for SSL certificate verification
+- Port 443 (HTTPS) - for secure traffic
+
+### SSL Certificates
+
+SSL certificates are automatically managed by Let's Encrypt via nginx-proxy-acme-companion. Certificates will auto-renew before expiration.
 
 ## Project Structure
 
 ```
 web/
-├── wp-admin/           # WordPress admin
 ├── wp-content/
 │   ├── plugins/        # WordPress plugins
 │   ├── themes/
-│   │   ├── oceanwp/           # Parent theme
-│   │   └── oceanwp-child/     # Custom child theme
+│   │   └── oceanwp/    # OceanWP theme
 │   └── uploads/        # Media files (not in git)
-├── wp-includes/        # WordPress core
-├── docker-compose.yml  # Docker configuration
-├── Dockerfile          # Custom WordPress image
-└── .htaccess           # Apache configuration
+├── docker-compose.yml      # Local development
+├── docker-compose.prod.yml # Production with SSL
+├── Dockerfile              # Custom WordPress image
+├── deploy.sh               # Deployment script
+├── .env.example            # Environment template
+└── nginx-custom.conf       # Nginx configuration
 ```
 
-## Custom Child Theme
+## Workflow
 
-The `oceanwp-child` theme includes UI/UX improvements:
+1. **Local Development:**
+   - Make changes locally
+   - Test at http://localhost:8080
+   - Commit and push to GitHub
 
-- Sticky header with shrink effect
-- Consistent button styles
-- Mobile-optimized touch targets (48px min)
-- Floating cart button for mobile
-- Checkout progress indicator
-- Accessibility improvements
-- Typography enhancements
+2. **Deploy to Production:**
+   - SSH to Oracle Cloud server
+   - Run `./deploy.sh update`
+   - Changes are live!
 
-## Deployment
+## Backup Strategy
 
-For GoDaddy WordPress hosting:
+- Database backups: `./deploy.sh backup`
+- Backups stored in `backups/` directory
+- Recommended: Set up automated backups via cron
 
-1. Upload files via FTP/SFTP
-2. Import database via phpMyAdmin
-3. Update `wp-config.php` with production credentials
-4. Run search-replace for URLs if needed
-
-## Environment Variables
-
-Create a `.env` file or set in `wp-config.php`:
-
-```
-WORDPRESS_DB_HOST=your-db-host
-WORDPRESS_DB_USER=your-db-user
-WORDPRESS_DB_PASSWORD=your-db-password
-WORDPRESS_DB_NAME=your-db-name
+```bash
+# Add to crontab (daily backup at 2 AM)
+0 2 * * * cd ~/madhu/web && ./deploy.sh backup
 ```
