@@ -130,11 +130,30 @@ cd ~/madhu/web
 |---------|-------------|
 | `./deploy.sh setup` | Initial server setup |
 | `./deploy.sh update` | Pull latest & redeploy |
+| `./deploy.sh migrate-urls` | Replace localhost URLs with production domain |
+| `./deploy.sh check-urls` | Check for hardcoded URLs in database |
 | `./deploy.sh backup` | Create backup |
 | `./deploy.sh restore <dir>` | Restore from backup |
 | `./deploy.sh logs` | View container logs |
 | `./deploy.sh status` | Show container status |
 | `./deploy.sh stop` | Stop all containers |
+
+### URL Migration (Important!)
+
+WordPress stores URLs in the database. After first deployment, run:
+
+```bash
+./deploy.sh migrate-urls
+```
+
+This replaces:
+- `http://localhost:8080` → `https://yourdomain.com`
+- All other localhost references
+
+To check for hardcoded URLs:
+```bash
+./deploy.sh check-urls
+```
 
 ### Oracle Cloud Security Rules
 

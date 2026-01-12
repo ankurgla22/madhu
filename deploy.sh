@@ -53,6 +53,9 @@ setup() {
 
     log_info "Setup complete!"
     log_info "Your site should be available at https://\${DOMAIN} (check .env for domain)"
+    log_warn ""
+    log_warn "IMPORTANT: Run './deploy.sh migrate-urls' to update database URLs!"
+    log_warn "This replaces localhost URLs with your production domain."
 }
 
 # Update deployment (pull latest and restart)
@@ -155,6 +158,70 @@ stop() {
     log_info "Containers stopped."
 }
 
+# Migrate URLs in database (search-replace)
+migrate_urls() {
+    check_env
+    source .env
+
+    if [ -z "$DOMAIN" ]; then
+        log_error "DOMAIN not set in .env file!"
+        exit 1
+    fi
+
+    NEW_URL="https://${DOMAIN}"
+
+    log_info "Migrating URLs to: $NEW_URL"
+
+    # Common old URLs to replace
+    OLD_URLS=(
+        "http://localhost:8080"
+        "http://localhost"
+        "https://localhost:8080"
+        "https://localhost"
+    )
+
+    for OLD_URL in "${OLD_URLS[@]}"; do
+        log_info "Checking for: $OLD_URL"
+        COUNT=$(docker exec madhu-wordpress wp search-replace "$OLD_URL" "$NEW_URL" --all-tables --dry-run --allow-root 2>/dev/null | tail -1 | grep -oP '\d+(?= replacements)' || echo "0")
+
+        if [ "$COUNT" != "0" ] && [ -n "$COUNT" ]; then
+            log_info "Found $COUNT occurrences of $OLD_URL, replacing..."
+            docker exec madhu-wordpress wp search-replace "$OLD_URL" "$NEW_URL" --all-tables --allow-root 2>/dev/null
+        fi
+    done
+
+    # Clear caches after URL change
+    log_info "Clearing caches..."
+    docker exec madhu-wordpress wp cache flush --allow-root 2>/dev/null || true
+    docker exec madhu-wordpress wp rewrite flush --allow-root 2>/dev/null || true
+
+    log_info "URL migration complete!"
+    log_info "Site URL is now: $NEW_URL"
+}
+
+# Check current URLs in database
+check_urls() {
+    log_info "Current WordPress URLs:"
+    echo "  Site URL: $(docker exec madhu-wordpress wp option get siteurl --allow-root 2>/dev/null)"
+    echo "  Home URL: $(docker exec madhu-wordpress wp option get home --allow-root 2>/dev/null)"
+    echo ""
+
+    log_info "Checking for hardcoded URLs..."
+
+    URLS_TO_CHECK=(
+        "localhost:8080"
+        "localhost"
+        "127.0.0.1"
+    )
+
+    for URL in "${URLS_TO_CHECK[@]}"; do
+        COUNT=$(docker exec madhu-wordpress wp search-replace "$URL" "PLACEHOLDER" --all-tables --dry-run --allow-root 2>/dev/null | tail -1 | grep -oP '\d+(?= replacements)' || echo "0")
+        if [ "$COUNT" != "0" ] && [ -n "$COUNT" ]; then
+            log_warn "Found $COUNT references to '$URL'"
+        fi
+    done
+}
+
 # Show help
 help() {
     echo "Madhu Spices Japan - Deployment Script"
@@ -162,25 +229,29 @@ help() {
     echo "Usage: ./deploy.sh <command>"
     echo ""
     echo "Commands:"
-    echo "  setup    - Initial server setup (first time deployment)"
-    echo "  update   - Pull latest code and redeploy"
-    echo "  backup   - Create database and uploads backup"
-    echo "  restore  - Restore from backup"
-    echo "  logs     - View container logs"
-    echo "  status   - Show container status"
-    echo "  stop     - Stop all containers"
-    echo "  help     - Show this help message"
+    echo "  setup       - Initial server setup (first time deployment)"
+    echo "  update      - Pull latest code and redeploy"
+    echo "  backup      - Create database and uploads backup"
+    echo "  restore     - Restore from backup"
+    echo "  migrate-urls - Replace localhost URLs with production domain"
+    echo "  check-urls  - Check for hardcoded URLs in database"
+    echo "  logs        - View container logs"
+    echo "  status      - Show container status"
+    echo "  stop        - Stop all containers"
+    echo "  help        - Show this help message"
 }
 
 # Main
 case "${1:-help}" in
-    setup)  setup ;;
-    update) update ;;
-    backup) backup ;;
-    restore) restore "$2" ;;
-    logs)   logs ;;
-    status) status ;;
-    stop)   stop ;;
-    help)   help ;;
-    *)      log_error "Unknown command: $1"; help; exit 1 ;;
+    setup)        setup ;;
+    update)       update ;;
+    backup)       backup ;;
+    restore)      restore "$2" ;;
+    migrate-urls) migrate_urls ;;
+    check-urls)   check_urls ;;
+    logs)         logs ;;
+    status)       status ;;
+    stop)         stop ;;
+    help)         help ;;
+    *)            log_error "Unknown command: $1"; help; exit 1 ;;
 esac
