@@ -74,7 +74,7 @@ services:
     image: mysql:8.0
     container_name: madhu-mysql
     restart: always
-    command: --innodb-buffer-pool-size=128M --innodb-log-file-size=32M --max-connections=50 --key-buffer-size=16M --query-cache-size=0
+    command: --innodb-buffer-pool-size=128M --innodb-log-file-size=32M --max-connections=50 --key-buffer-size=16M
     environment:
       MYSQL_DATABASE: ${DB_NAME}
       MYSQL_USER: ${DB_USER}
