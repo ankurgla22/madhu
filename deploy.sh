@@ -26,6 +26,35 @@ check_env() {
     fi
 }
 
+# Initialize database (create database and user if not exists)
+init_database() {
+    log_info "Initializing database..."
+
+    check_env
+    source .env
+
+    # Wait for MySQL to be ready
+    log_info "Waiting for MySQL to be ready..."
+    for i in {1..30}; do
+        if docker exec madhu-mysql mysqladmin ping -h localhost --silent 2>/dev/null; then
+            log_info "MySQL is ready!"
+            break
+        fi
+        sleep 2
+    done
+
+    # Create database and user
+    log_info "Creating database and user..."
+    docker exec madhu-mysql mysql -uroot -p"${DB_ROOT_PASSWORD}" <<-EOSQL 2>/dev/null || true
+		CREATE DATABASE IF NOT EXISTS ${DB_NAME} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+		CREATE USER IF NOT EXISTS '${DB_USER}'@'%' IDENTIFIED BY '${DB_PASSWORD}';
+		GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO '${DB_USER}'@'%';
+		FLUSH PRIVILEGES;
+	EOSQL
+
+    log_info "Database initialized successfully!"
+}
+
 # Initial server setup
 setup() {
     log_info "Starting initial setup..."
@@ -45,8 +74,8 @@ setup() {
     log_info "Building and starting containers..."
     docker compose -f docker-compose.prod.yml up -d --build
 
-    log_info "Waiting for services to be ready..."
-    sleep 30
+    # Initialize database
+    init_database
 
     # Show status
     status
@@ -83,12 +112,15 @@ update() {
 backup() {
     log_info "Creating backup..."
 
+    check_env
+    source .env
+
     BACKUP_DIR="backups/$(date +%Y%m%d_%H%M%S)"
     mkdir -p "$BACKUP_DIR"
 
     # Database backup
     log_info "Backing up database..."
-    docker exec madhu-mysql mysqldump -uwordpress -p"${DB_PASSWORD:-wordpress_password}" --no-tablespaces wordpress > "$BACKUP_DIR/database.sql" 2>/dev/null
+    docker exec madhu-mysql mysqldump -u"${DB_USER}" -p"${DB_PASSWORD}" --no-tablespaces "${DB_NAME}" 2>/dev/null > "$BACKUP_DIR/database.sql"
 
     # Uploads backup (if not too large)
     if [ -d "wp-content/uploads" ]; then
@@ -108,6 +140,9 @@ restore() {
         exit 1
     fi
 
+    check_env
+    source .env
+
     BACKUP_DIR="$1"
 
     if [ ! -d "$BACKUP_DIR" ]; then
@@ -125,7 +160,7 @@ restore() {
     # Restore database
     if [ -f "$BACKUP_DIR/database.sql" ]; then
         log_info "Restoring database..."
-        docker exec -i madhu-mysql mysql -uwordpress -p"${DB_PASSWORD:-wordpress_password}" wordpress < "$BACKUP_DIR/database.sql"
+        docker exec -i madhu-mysql mysql -u"${DB_USER}" -p"${DB_PASSWORD}" "${DB_NAME}" < "$BACKUP_DIR/database.sql"
     fi
 
     # Restore uploads
@@ -229,21 +264,23 @@ help() {
     echo "Usage: ./deploy.sh <command>"
     echo ""
     echo "Commands:"
-    echo "  setup       - Initial server setup (first time deployment)"
-    echo "  update      - Pull latest code and redeploy"
-    echo "  backup      - Create database and uploads backup"
-    echo "  restore     - Restore from backup"
+    echo "  setup        - Initial server setup (first time deployment)"
+    echo "  init-db      - Initialize database and user (if not exists)"
+    echo "  update       - Pull latest code and redeploy"
+    echo "  backup       - Create database and uploads backup"
+    echo "  restore      - Restore from backup"
     echo "  migrate-urls - Replace localhost URLs with production domain"
-    echo "  check-urls  - Check for hardcoded URLs in database"
-    echo "  logs        - View container logs"
-    echo "  status      - Show container status"
-    echo "  stop        - Stop all containers"
-    echo "  help        - Show this help message"
+    echo "  check-urls   - Check for hardcoded URLs in database"
+    echo "  logs         - View container logs"
+    echo "  status       - Show container status"
+    echo "  stop         - Stop all containers"
+    echo "  help         - Show this help message"
 }
 
 # Main
 case "${1:-help}" in
     setup)        setup ;;
+    init-db)      init_database ;;
     update)       update ;;
     backup)       backup ;;
     restore)      restore "$2" ;;

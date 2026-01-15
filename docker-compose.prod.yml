@@ -17,8 +17,8 @@ services:
       - ./nginx-custom.conf:/etc/nginx/conf.d/custom.conf:ro
     networks:
       - wordpress-network
-    mem_limit: 128m
-    mem_reservation: 64m
+    mem_limit: 256m
+    mem_reservation: 128m
 
   # Let's Encrypt SSL Certificate Manager
   acme-companion:
@@ -38,8 +38,8 @@ services:
       - NGINX_PROXY_CONTAINER=nginx-proxy
     networks:
       - wordpress-network
-    mem_limit: 64m
-    mem_reservation: 32m
+    mem_limit: 128m
+    mem_reservation: 64m
 
   wordpress:
     build:
@@ -67,14 +67,14 @@ services:
         condition: service_healthy
     networks:
       - wordpress-network
-    mem_limit: 384m
-    mem_reservation: 256m
+    mem_limit: 1024m
+    mem_reservation: 512m
 
   db:
     image: mysql:8.0
     container_name: madhu-mysql
     restart: always
-    command: --innodb-buffer-pool-size=128M --innodb-log-file-size=32M --max-connections=50 --key-buffer-size=16M
+    command: --innodb-buffer-pool-size=512M --innodb-log-file-size=64M --max-connections=100 --key-buffer-size=32M
     environment:
       MYSQL_DATABASE: ${DB_NAME}
       MYSQL_USER: ${DB_USER}
@@ -89,8 +89,8 @@ services:
       retries: 5
     networks:
       - wordpress-network
-    mem_limit: 384m
-    mem_reservation: 256m
+    mem_limit: 1024m
+    mem_reservation: 768m
 
 volumes:
   db_data:
